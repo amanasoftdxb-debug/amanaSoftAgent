@@ -2,22 +2,20 @@
 {% from "_icons.html" import icon %}
 {% block title %}Upload{% endblock %}
 {% block content %}
-<section class="card composer up-hero">
-  <div class="composer-head">
-    <div>
-      <span class="eyebrow">{{ icon("upload", 15) }} Your own media</span>
-      <h1>Post your own <em>photos or video</em></h1>
-      <p class="composer-sub">Upload it and the AI looks at it, then writes the title and a caption for every platform.
-        You approve it in the email, and only then is it published.</p>
-    </div>
+<div class="page-head">
+  <div>
+    <span class="eyebrow dark">{{ icon("upload", 15) }} Your own media</span>
+    <h1>Post your own photos or video</h1>
+    <p class="muted" style="margin:0">Upload it and the AI looks at it, then writes the title and a caption for every platform.
+      You approve it in the email, and only then is it published.</p>
   </div>
-  <ol class="up-steps">
-    <li><b>1</b><span>Upload your photo or video</span></li>
-    <li><b>2</b><span>The AI checks it and writes</span></li>
-    <li><b>3</b><span>You approve by email</span></li>
-    <li><b>4</b><span>Buffer publishes it</span></li>
-  </ol>
-</section>
+</div>
+<ol class="up-steps">
+  <li><b>1</b><span>Upload your photo or video</span></li>
+  <li><b>2</b><span>The AI checks it and writes</span></li>
+  <li><b>3</b><span>You approve by email</span></li>
+  <li><b>4</b><span>Buffer publishes it</span></li>
+</ol>
 
 <form id="up-form" class="up-grid" novalidate>
   <section class="card up-main">

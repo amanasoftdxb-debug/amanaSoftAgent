@@ -2,18 +2,14 @@
 {% from "_icons.html" import icon %}
 {% block title %}Demos{% endblock %}
 {% block content %}
-<section class="split">
-  <aside class="split-info">
-    <span class="eyebrow">{{ icon("image", 15) }} Industry demos</span>
-    <h1>Show a prospect their <em>next post</em></h1>
-    <p class="split-sub">Pick an industry and get a branded demo picture in about a minute.</p>
-    <ul class="split-notes">
-      <li>{{ icon("shield", 15) }}Demos are only for showing: never emailed for approval, never published</li>
-      <li>{{ icon("sparkle", 15) }}Each new demo for the same industry shows a different scene</li>
-      <li>{{ icon("upload", 15) }}Download it and share it with the prospect</li>
-    </ul>
-  </aside>
-  <form id="new-demo" class="split-form">
+<div class="page-head">
+  <div>
+    <span class="eyebrow dark">{{ icon("image", 15) }} Industry demos</span>
+    <h1>Show a prospect their next post</h1>
+    <p class="muted" style="margin:0">Pick an industry and get a branded demo picture in about a minute. Demos are never emailed for approval and never published.</p>
+  </div>
+</div>
+  <form id="new-demo" class="card form-card">
     <div class="selects one">
       <label>Industry
         <select name="industry" id="industry">
@@ -29,7 +25,6 @@
       <button class="btn yellow big" id="go">{{ icon("sparkle", 17) }} Create demo</button>
     </div>
   </form>
-</section>
 
 <section class="list-section">
   <div class="section-head">

@@ -265,8 +265,8 @@ async def alert_cookie_dead(slot: str, error: str, others: list[str] | None = No
             + " (ok = working; posts keep using the next working account: A, then B, then C).",
             "To fix: in FIREFOX open a private window → log in to that Google account → open gemini.google.com.",
             "Press F12 → Storage → Cookies → https://gemini.google.com → copy __Secure-1PSID and __Secure-1PSIDTS.",
-            f"Put them in GEMINI_{slot}_1PSID and GEMINI_{slot}_1PSIDTS: in the .env file on your computer, or on Render "
-            "in the service's Environment tab. Then restart the app (on Render: Save → it redeploys by itself).",
+            f"Put them in account \"{slot}\" of GEMINI_HARDCODED in app/config.py (these win over .env and Render), "
+            "then push to GitHub: Render deploys the new version by itself in a few minutes.",
             "Close the private window WITHOUT logging out.",
         ],
     )

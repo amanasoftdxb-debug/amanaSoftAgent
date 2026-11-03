@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0B1230">
+  <meta name="theme-color" content="#1B1C20">
   <title>{% block title %}Post Agent{% endblock %} · {{ brand.name }}</title>
   <link rel="icon" href="/brand-assets/logo/logo-icon-original.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,30 +12,34 @@
   <link rel="stylesheet" href="{{ static_url('app.css') }}">
 </head>
 <body class="{% block body_class %}{% endblock %}">
-{% if request.session.get('auth') %}
-<header class="top">
-  <div class="top-in">
-    <a class="top-brand" href="/">
-      <img src="/brand-assets/logo/logo-white-original.png" alt="{{ brand.name }}">
-      <span>Post Agent</span>
-    </a>
-    <nav>
-      <a href="/" class="{{ 'on' if request.url.path == '/' }}">{{ icon("grid", 17) }}<b>Posts</b></a>
-      <a href="/schedule" class="{{ 'on' if request.url.path == '/schedule' }}">{{ icon("calendar", 17) }}<b>Schedule</b></a>
-      <a href="/upload" class="{{ 'on' if request.url.path == '/upload' }}">{{ icon("upload", 17) }}<b>Upload</b></a>
-      <a href="/demos" class="{{ 'on' if request.url.path == '/demos' }}">{{ icon("image", 17) }}<b>Demos</b></a>
-    </nav>
-    <div class="top-right">
-      {% if now_dubai %}<span class="top-time" title="Dubai time">{{ icon("clock", 15) }}{{ now_dubai }}</span>{% endif %}
-      <a href="/logout" class="top-out" title="Log out">{{ icon("logout", 17) }}<b>Log out</b></a>
-    </div>
+{% set authed = request.session.get('auth') %}
+{% if authed %}
+{% set path = request.url.path %}
+<div class="shell">
+<aside class="side">
+  <a class="side-brand" href="/">
+    <img src="/brand-assets/logo/logo-white-original.png" alt="{{ brand.name }}">
+    <span>Post Agent</span>
+  </a>
+  <div class="side-label">Menu</div>
+  <nav class="side-nav">
+    <a href="/" class="{{ 'on' if path == '/' or path.startswith('/posts') }}">{{ icon("grid", 18) }}<b>Posts</b></a>
+    <a href="/schedule" class="{{ 'on' if path == '/schedule' }}">{{ icon("calendar", 18) }}<b>Schedule</b></a>
+    <a href="/upload" class="{{ 'on' if path == '/upload' }}">{{ icon("upload", 18) }}<b>Upload</b></a>
+    <a href="/demos" class="{{ 'on' if path == '/demos' }}">{{ icon("image", 18) }}<b>Demos</b></a>
+  </nav>
+  <div class="side-foot">
+    {% if now_dubai %}<span class="side-time" title="Dubai time">{{ icon("clock", 15) }}<span>{{ now_dubai }}<small>Dubai time</small></span></span>{% endif %}
+    <a href="/logout" class="side-out" title="Log out">{{ icon("logout", 17) }}<b>Log out</b></a>
   </div>
-</header>
+</aside>
+<div class="shell-main">
 {% endif %}
-{% if settings.dry_run_publish and request.session.get('auth') %}
+{% if settings.dry_run_publish and authed %}
 <div class="banner">{{ icon("info", 15) }} Test mode is on (DRY_RUN_PUBLISH=true): approving a post does everything except actually posting.</div>
 {% endif %}
 <main class="wrap">{% block content %}{% endblock %}</main>
+{% if authed %}</div></div>{% endif %}
 <div id="toast" class="toast" hidden></div>
 {% if request.session.get('auth') %}
 {% macro bot(cls="") -%}

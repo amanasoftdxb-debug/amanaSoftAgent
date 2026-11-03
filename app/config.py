@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parent.parent
 GEMINI_HARDCODED = {
     "A": ("g.a000EQn6fPyDNh5JkCH5_UCcKMcncWHp6MjEn8G4CkuLqLfFxxVgizInOx33UUJEypDSfhcuowACgYKAfMSARESFQHGX2Mi9k_xGp3hVs7ROG2SfQELpRoVAUF8yKqspHYu6v6sSv2X_HfPtjDw0076",
           "sidts-CjIBnJZzarlz3-dsOWEOqk2jyymfmKVkN-ZJwLil8mAh7v9YfBZLzBx6KZLoYR5-CuFqfBAA"),
+    "B": ("g.a000EQnWVyqXjIiIcNg7ozGmFRl-Z2L9szWC-3uFXMKGisokG50aiRfjlynQjKth_TqnMy-t9gACgYKAQkSARESFQHGX2MiAg6vzUZSZ4l21OUW2-nDzBoVAUF8yKoQA8a1NYhAu-eVMxgANbep0076",
+          "sidts-CjIBnJZzav2gY8MKD94hxx6yuG7W_3OMV-UHLb4A39pyMsJa2dxiDKr5yxwvUP9AWDu8VxAA"),  # backup when A stops working
 }
 
 

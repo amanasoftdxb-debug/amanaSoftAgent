@@ -686,6 +686,8 @@ def test_new_cookie_in_env_wins_over_saved_copy(monkeypatch):
     from app.config import get_settings
     from app.store import get_store
 
+    monkeypatch.setattr(imagegen, "GEMINI_HARDCODED", {})  # cookies written in the code would win over .env
+
     async def go():
         st, s = get_store(), get_settings()
         monkeypatch.setattr(s, "gemini_b_1psid", "PSID-ONE")

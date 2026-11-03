@@ -2,24 +2,14 @@
 {% from "_icons.html" import icon %}
 {% block title %}Posts{% endblock %}
 {% block content %}
-<section class="split">
-  <aside class="split-info">
-    <span class="eyebrow">{{ icon("sparkle", 15) }} New post</span>
-    <h1>What should we <em>post</em> today?</h1>
-    <p class="split-sub">Type an idea, or leave it empty: the agent writes it, designs it and emails it to you for approval.</p>
-    <ol class="split-steps">
-      <li><b>1</b><span><strong>Describe it</strong>A few words are enough, or nothing at all</span></li>
-      <li><b>2</b><span><strong>The AI makes it</strong>Picture, words and captions in 1–2 minutes</span></li>
-      <li><b>3</b><span><strong>You approve</strong>One tap in the email, or here on the dashboard</span></li>
-      <li><b>4</b><span><strong>It goes live</strong>Right away, or at the time you pick</span></li>
-    </ol>
-    <ul class="split-notes">
-      <li>{{ icon("check", 15) }}Everything on Auto = a fresh topic that hasn't been posted before</li>
-      <li>{{ icon("check", 15) }}Text never covers a face, and you can try any other layout afterwards</li>
-      <li>{{ icon("calendar", 15) }}Daily automatic posts: <a href="/schedule">Schedule</a></li>
-    </ul>
-  </aside>
-  <form id="new-post" class="split-form">
+<div class="page-head">
+  <div>
+    <span class="eyebrow dark">{{ icon("sparkle", 15) }} New post</span>
+    <h1>What should we post today?</h1>
+    <p class="muted" style="margin:0">Type an idea, or leave it empty: the agent writes it, designs it and emails it to you for approval.</p>
+  </div>
+</div>
+  <form id="new-post" class="card form-card">
     <label class="field-label" for="idea">Prompt</label>
     <textarea id="idea" name="idea" class="prompt-box" placeholder="What is the post about? The picture is made from this. e.g. “A black luxury car in front of the Burj Khalifa at night” or “CCTV for warehouses”. Leave it empty and the agent picks a fresh topic."></textarea>
     <label class="field-label" for="message">Message on the post <span class="opt">(optional)</span></label>
@@ -67,11 +57,11 @@
       <label><input type="radio" name="template" value="clean"><span>Simple photo</span></label>
     </div>
     <div class="foot">
-      <span class="hint">{{ icon("clock", 15) }}<span>About 1–2 minutes, then an email to approve.</span></span>
+      <span class="hint">{{ icon("info", 15) }}<span>Everything on Auto = a fresh topic that hasn't been posted before. About 1–2 minutes, then an email to approve.
+        Daily automatic posts: <a href="/schedule">Schedule</a>.</span></span>
       <button class="btn yellow big" id="go">{{ icon("sparkle", 17) }} Create post</button>
     </div>
   </form>
-</section>
 
 <div class="stats" id="stats"></div>
 
