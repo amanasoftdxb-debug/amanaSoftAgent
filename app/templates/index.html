@@ -2,18 +2,27 @@
 {% from "_icons.html" import icon %}
 {% block title %}Posts{% endblock %}
 {% block content %}
-<section class="card composer">
-  <div class="composer-head">
-    <div>
-      <span class="eyebrow">{{ icon("sparkle", 15) }} New post</span>
-      <h1>What should we <em>post</em> today?</h1>
-      <p class="composer-sub">Type an idea, or leave it empty: the agent writes it, designs it and emails it to you for approval.</p>
-    </div>
-  </div>
-  <form id="new-post">
-    <div class="field-label" style="margin-top:20px">Prompt</div>
+<section class="split">
+  <aside class="split-info">
+    <span class="eyebrow">{{ icon("sparkle", 15) }} New post</span>
+    <h1>What should we <em>post</em> today?</h1>
+    <p class="split-sub">Type an idea, or leave it empty: the agent writes it, designs it and emails it to you for approval.</p>
+    <ol class="split-steps">
+      <li><b>1</b><span><strong>Describe it</strong>A few words are enough, or nothing at all</span></li>
+      <li><b>2</b><span><strong>The AI makes it</strong>Picture, words and captions in 1–2 minutes</span></li>
+      <li><b>3</b><span><strong>You approve</strong>One tap in the email, or here on the dashboard</span></li>
+      <li><b>4</b><span><strong>It goes live</strong>Right away, or at the time you pick</span></li>
+    </ol>
+    <ul class="split-notes">
+      <li>{{ icon("check", 15) }}Everything on Auto = a fresh topic that hasn't been posted before</li>
+      <li>{{ icon("check", 15) }}Text never covers a face, and you can try any other layout afterwards</li>
+      <li>{{ icon("calendar", 15) }}Daily automatic posts: <a href="/schedule">Schedule</a></li>
+    </ul>
+  </aside>
+  <form id="new-post" class="split-form">
+    <label class="field-label" for="idea">Prompt</label>
     <textarea id="idea" name="idea" class="prompt-box" placeholder="What is the post about? The picture is made from this. e.g. “A black luxury car in front of the Burj Khalifa at night” or “CCTV for warehouses”. Leave it empty and the agent picks a fresh topic."></textarea>
-    <div class="field-label">Message on the post <span class="opt">(optional)</span></div>
+    <label class="field-label" for="message">Message on the post <span class="opt">(optional)</span></label>
     <textarea id="message" name="message" class="message-box" rows="2" maxlength="150" placeholder="The exact words to show on the picture, e.g. “Arrive in style. Book your chauffeur today.” Leave it empty and the AI writes it from the prompt."></textarea>
     <div class="selects">
       <label>Service
@@ -58,9 +67,7 @@
       <label><input type="radio" name="template" value="clean"><span>Simple photo</span></label>
     </div>
     <div class="foot">
-      <span class="hint">{{ icon("info", 15) }}<span>Everything on Auto = a fresh topic that hasn't been posted before. About 1–2 minutes, then an email to approve.
-        Text never covers a face, and after the post is made you can try it in any other layout.
-        Daily automatic posts: <a href="/schedule">Schedule</a>.</span></span>
+      <span class="hint">{{ icon("clock", 15) }}<span>About 1–2 minutes, then an email to approve.</span></span>
       <button class="btn yellow big" id="go">{{ icon("sparkle", 17) }} Create post</button>
     </div>
   </form>
@@ -139,7 +146,7 @@ function render() {
 
 document.getElementById("more").addEventListener("click", async () => {
   limit += 60;
-  try { posts = await api("GET", `/api/posts?limit=${limit}`); render(); } catch (e) { toast(e.message, true); }
+  try { posts = await api("GET", `/api/posts?limit=${limit}`); changed(seen, posts); render(); } catch (e) { toast(e.message, true); }
 });
 
 document.getElementById("filters").addEventListener("click", (e) => {
@@ -160,10 +167,12 @@ document.getElementById("when-mode").addEventListener("change", (e) => {
   document.getElementById("when-at-wrap").hidden = e.target.value !== "at";
 });
 
-async function poll() {
-  try { posts = await api("GET", `/api/posts?limit=${limit}`); render(); } catch (e) {}
-  setTimeout(poll, posts.some((p) => WORKING.includes(p.status)) ? 3000 : 15000);
-}
+const seen = {};
+changed(seen, posts);
+const live = livePoll(async () => {
+  const fresh = await api("GET", `/api/posts?limit=${limit}`);
+  if (changed(seen, fresh)) { posts = fresh; render(); }  // nothing new = nothing redrawn, no flicker
+}, () => (posts.some((p) => WORKING.includes(p.status)) ? 4000 : 20000));
 
 document.getElementById("new-post").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -178,7 +187,7 @@ document.getElementById("new-post").addEventListener("submit", async (e) => {
       template: (f.get("style") === "showcase" ? f.get("sc_template") : f.get("template")) || null,
       service: f.get("service") || null, post_type: f.get("post_type") || null, publish_at: at,
     });
-    posts.unshift(p); filter = "all"; render();
+    posts.unshift(p); filter = "all"; render(); live.soon(3000);
     document.getElementById("idea").value = "";
     document.getElementById("message").value = "";
     toast(at ? `Working on it. After you approve, it goes out on ${dubai(p.scheduled_for)}.` : "Working on it. Watch the card below.");
@@ -187,6 +196,6 @@ document.getElementById("new-post").addEventListener("submit", async (e) => {
 });
 
 render();
-setTimeout(poll, 3000);
+live.start(3000);
 </script>
 {% endblock %}

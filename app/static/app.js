@@ -32,6 +32,31 @@ async function api(method, url, body) {
   return data;
 }
 
+// Keeps a page up to date without refreshing it: one check at a time (never several at once), paused while the
+// tab is hidden, and checked again as soon as the tab is shown. `step` fetches and updates; `delay` says when next.
+function livePoll(step, delay) {
+  let timer = 0, running = false;
+  function schedule(ms) { clearTimeout(timer); timer = setTimeout(tick, ms); }
+  async function tick() {
+    timer = 0;
+    if (document.hidden) return;  // picked up again by visibilitychange
+    running = true;
+    try { await step(); } catch (e) {}
+    running = false;
+    schedule(delay());
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && !running) schedule(250); });
+  return { soon(ms = 800) { if (!running) schedule(ms); }, start(ms = 3000) { schedule(ms); } };
+}
+
+// true when fresh data differs from what is on screen (so an unchanged list is never redrawn)
+function changed(holder, data) {
+  const sig = JSON.stringify(data);
+  if (holder.sig === sig) return false;
+  holder.sig = sig;
+  return true;
+}
+
 function toast(msg, bad = false) {
   const t = document.getElementById("toast");
   t.textContent = msg;

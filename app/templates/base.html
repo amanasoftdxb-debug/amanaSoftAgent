@@ -40,11 +40,14 @@
 {% if request.session.get('auth') %}
 {% macro bot(cls="") -%}
 <span class="bot {{ cls }}" data-mood="idle" aria-hidden="true">
-  <span class="bot-antenna"><i></i></span>
-  <span class="bot-head"><span class="bot-face">
-    <span class="eye l"></span><span class="eye r"></span><span class="mouth"></span>
-    <span class="cheek l"></span><span class="cheek r"></span>
-  </span></span>
+  <span class="bot-sprout"><i></i></span>
+  <span class="bot-body">
+    <span class="bot-arm l"></span><span class="bot-arm r"></span>
+    <span class="bot-face">
+      <span class="eye l"></span><span class="eye r"></span><span class="mouth"></span>
+      <span class="cheek l"></span><span class="cheek r"></span>
+    </span>
+  </span>
 </span>
 {%- endmacro %}
 <div class="ai" id="ai">

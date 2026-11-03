@@ -33,7 +33,7 @@
     {% elif post.final_image_url and not working %}
       <div class="media-frame"><img class="bigimg" src="{{ b._thumb or post.final_image_url }}" data-full="{{ post.final_image_url }}" alt="Post image"></div>
     {% else %}
-      <div class="card thumb"><div class="wait">{% if working %}<div class="spinner"></div>{% endif %}{{ post.stage_note or "" }}</div></div>
+      <div class="card thumb"><div class="wait">{% if working %}<div class="spinner"></div>{% endif %}<span class="js-stage">{{ post.stage_note or "" }}</span></div></div>
     {% endif %}
     {% if post.history %}
     <div class="card">
@@ -71,7 +71,7 @@
       {% endif %}
       {% if post.status == "published" and post.published_at %}<p class="muted small" style="margin:0">Published {{ post.published_at|dubai }} (Dubai time)</p>{% endif %}
       {% if post.error %}<div class="alert bad">{{ post.error }}</div>{% endif %}
-      {% if working or post.status in ["missed", "cancelled"] or (post.status == "scheduled" and not when) %}<div class="alert info">{{ post.stage_note }}</div>{% endif %}
+      {% if working or post.status in ["missed", "cancelled"] or (post.status == "scheduled" and not when) %}<div class="alert info js-stage">{{ post.stage_note }}</div>{% endif %}
 
       {% if post.status == "pending_review" %}
       <div class="row">
@@ -275,13 +275,14 @@ async function reschedule() {
   } catch (e) { toast(e.message, true); }
 }
 {% if working %}
-setTimeout(async function check() {
-  try {
-    const p = await api("GET", "/api/posts/{{ post.id }}");
-    if (p.status !== {{ post.status|tojson }}) return location.reload();
-  } catch (e) {}
-  setTimeout(check, 3000);
-}, 3000);
+// While the post is being made, show each step in place; reload once, only when it is finished
+// (the page then needs the new picture and buttons). No more reloading at every step.
+livePoll(async () => {
+  const p = await api("GET", "/api/posts/{{ post.id }}");
+  if (!WORKING.includes(p.status)) return location.reload();
+  document.getElementById("badge").innerHTML = badge(p.status);
+  document.querySelectorAll(".js-stage").forEach((el) => { if (el.textContent !== (p.stage_note || "")) el.textContent = p.stage_note || ""; });
+}, () => 3000).start(3000);
 {% endif %}
 </script>
 {% endblock %}

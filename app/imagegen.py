@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .config import get_settings
+from .config import GEMINI_HARDCODED, get_settings
 
 os.environ.setdefault("GEMINI_COOKIE_PATH", str(get_settings().data_dir / "gemini_cookies"))
 
@@ -58,6 +58,8 @@ class GeminiPool:
         store = get_store()
         env_psid = (getattr(s, f"gemini_{slot.lower()}_1psid") or "").strip()
         env_ts = (getattr(s, f"gemini_{slot.lower()}_1psidts") or "").strip()
+        if GEMINI_HARDCODED.get(slot):  # cookies written in app/config.py win over .env / Render
+            env_psid, env_ts = (v.strip() for v in GEMINI_HARDCODED[slot])
         saved = await store.get_setting(f"gemini_cookie_{slot}") or {}
         if env_psid:
             same_login = saved.get("psid") == env_psid

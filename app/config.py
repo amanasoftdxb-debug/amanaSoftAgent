@@ -7,6 +7,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Gemini cookies written straight into the code: {account: (__Secure-1PSID, __Secure-1PSIDTS)}.
+# They win over GEMINI_*_1PSID / _1PSIDTS from .env or Render. Replace them here when Google logs an account out.
+GEMINI_HARDCODED = {
+    "A": ("g.a000EQn6fPyDNh5JkCH5_UCcKMcncWHp6MjEn8G4CkuLqLfFxxVgizInOx33UUJEypDSfhcuowACgYKAfMSARESFQHGX2Mi9k_xGp3hVs7ROG2SfQELpRoVAUF8yKqspHYu6v6sSv2X_HfPtjDw0076",
+          "sidts-CjIBnJZzarlz3-dsOWEOqk2jyymfmKVkN-ZJwLil8mAh7v9YfBZLzBx6KZLoYR5-CuFqfBAA"),
+}
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ROOT / ".env", env_file_encoding="utf-8", extra="ignore")
@@ -31,6 +38,7 @@ class Settings(BaseSettings):
     openrouter_models: str = "openrouter/free,google/gemma-4-31b-it:free"
 
     # Gemini (browser cookies). Account A is tried first, then B, then C.
+    # Cookies in GEMINI_HARDCODED (below) win over these environment values.
     gemini_a_1psid: str = ""
     gemini_a_1psidts: str = ""
     gemini_b_1psid: str = ""

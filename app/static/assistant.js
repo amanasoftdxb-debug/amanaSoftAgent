@@ -55,8 +55,9 @@
   }
 
   // ---------- the chat ----------
-  const FACE = '<span class="bot tiny" data-mood="idle"><span class="bot-antenna"><i></i></span><span class="bot-head"><span class="bot-face">'
-    + '<span class="eye l"></span><span class="eye r"></span><span class="mouth"></span></span></span></span>';
+  const FACE = '<span class="bot tiny" data-mood="idle"><span class="bot-sprout"><i></i></span><span class="bot-body">'
+    + '<span class="bot-arm l"></span><span class="bot-arm r"></span><span class="bot-face"><span class="eye l"></span>'
+    + '<span class="eye r"></span><span class="mouth"></span><span class="cheek l"></span><span class="cheek r"></span></span></span></span>';
   const WELCOME = "Hi, I'm Amana 👋 Tell me an idea for a post, even just a few words, and I'll write 3 ready prompts "
     + "with a message for the picture. Copy them, or tap Use this to fill the Create post form.";
 
