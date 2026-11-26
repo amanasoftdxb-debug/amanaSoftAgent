@@ -202,7 +202,7 @@
         {% if b._plan %}<dt>Variety plan</dt><dd class="small">{{ b._plan.post_type|replace("_", " ") }} · for {{ b._plan.industry }} · {{ b._plan.person }} · {{ b._plan.setting }} · {{ b._plan.shot }} · {{ b._plan.light }} · caption: {{ b._plan.caption_style }}</dd>{% endif %}
         {% if b._variety_warning or c._variety_warning %}<dt>Variety</dt><dd class="small" style="color:var(--amber)">Could not fully avoid: {{ ((b._variety_warning or []) + (c._variety_warning or []))|join("; ") }}</dd>{% endif %}
         <dt>Text AI</dt><dd class="small">{{ b._model }}{% if c._model and c._model != b._model %} / {{ c._model }}{% endif %}</dd>
-        {% if b._gemini_account %}<dt>Gemini account</dt><dd>{{ b._gemini_account }}</dd>{% endif %}
+        {% if b._gemini_account %}<dt>Picture account</dt><dd>{{ b._gemini_account }}</dd>{% endif %}
       </dl>
       {% endif %}
     </div>

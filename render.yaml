@@ -26,6 +26,8 @@ services:
         sync: false
       - key: OPENROUTER_API_KEY
         sync: false
+      - key: BING_U
+        sync: false
       - key: GEMINI_A_1PSID
         sync: false
       - key: GEMINI_A_1PSIDTS

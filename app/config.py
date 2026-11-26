@@ -7,11 +7,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Account A makes pictures with Bing Image Creator (bing.com/images/create), logged in with Bing's "_U" cookie.
+# It wins over BING_U from .env or Render. Replace it here when Microsoft logs the account out.
+BING_HARDCODED_U = ("11_EQ-Lj4qPk1G11Rm_EFWi-RVzVqq0dgYM57K_gxUXD1haAdvlffgXsHFEJ2VAqPcVf-V2mtPHpzadJSzaVkxsrRZ5ggbX_6VF6Wg0qub"
+                    "OplCAgLW7IJ0NREkoOEV1QzJSFbzwK0FIdNR_2vyljhr9xoiSRRctj2JbHO-DcdkQOZq-o5hjGMPcAryT3NbtNBHt1tSvv3U0QFnnDW8KGErYP4"
+                    "UPTDsnW22GnHDRR-JPk")
+# Always told when a picture cookie (Bing or Gemini) stops working, besides ALERT_EMAIL_TO / REVIEW_EMAIL_TO.
+COOKIE_ALERT_EMAIL = "abdullahfida645@gmail.com"
+
 # Gemini cookies written straight into the code: {account: (__Secure-1PSID, __Secure-1PSIDTS)}.
 # They win over GEMINI_*_1PSID / _1PSIDTS from .env or Render. Replace them here when Google logs an account out.
+# Account A is Bing (above) whenever a Bing cookie is set.
 GEMINI_HARDCODED = {
-    "A": ("g.a000EQn6fPyDNh5JkCH5_UCcKMcncWHp6MjEn8G4CkuLqLfFxxVgizInOx33UUJEypDSfhcuowACgYKAfMSARESFQHGX2Mi9k_xGp3hVs7ROG2SfQELpRoVAUF8yKqspHYu6v6sSv2X_HfPtjDw0076",
-          "sidts-CjIBnJZzarlz3-dsOWEOqk2jyymfmKVkN-ZJwLil8mAh7v9YfBZLzBx6KZLoYR5-CuFqfBAA"),
     "B": ("g.a000EQnWVyqXjIiIcNg7ozGmFRl-Z2L9szWC-3uFXMKGisokG50aiRfjlynQjKth_TqnMy-t9gACgYKAQkSARESFQHGX2MiAg6vzUZSZ4l21OUW2-nDzBoVAUF8yKoQA8a1NYhAu-eVMxgANbep0076",
           "sidts-CjIBnJZzav2gY8MKD94hxx6yuG7W_3OMV-UHLb4A39pyMsJa2dxiDKr5yxwvUP9AWDu8VxAA"),  # backup when A stops working
 }
@@ -39,8 +46,10 @@ class Settings(BaseSettings):
     openrouter_api_key: str = ""
     openrouter_models: str = "openrouter/free,google/gemma-4-31b-it:free"
 
-    # Gemini (browser cookies). Account A is tried first, then B, then C.
-    # Cookies in GEMINI_HARDCODED (below) win over these environment values.
+    # Picture accounts: A, then B, then C. A is Bing Image Creator when a Bing "_U" cookie is set
+    # (BING_HARDCODED_U above, or BING_U here), otherwise Gemini. B and C are Gemini.
+    # Cookies written in app/config.py (above) win over these environment values.
+    bing_u: str = ""
     gemini_a_1psid: str = ""
     gemini_a_1psidts: str = ""
     gemini_b_1psid: str = ""

@@ -21,7 +21,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from . import publisher
 from .brand import load_brand
-from .config import get_settings
+from .config import COOKIE_ALERT_EMAIL, get_settings
 from .security import review_link
 from .store import get_store
 from .timeutil import fmt, now_utc, parse
@@ -242,7 +242,8 @@ async def _throttled(key: str, hours: float) -> bool:
     return False
 
 
-async def send_alert(key: str, subject: str, heading: str, lines: list[str], throttle_hours: float = 12):
+async def send_alert(key: str, subject: str, heading: str, lines: list[str], throttle_hours: float = 12,
+                     extra_to: list[str] | None = None):
     s = get_settings()
     try:
         if await _throttled(key, throttle_hours):
@@ -250,25 +251,45 @@ async def send_alert(key: str, subject: str, heading: str, lines: list[str], thr
         html = env.get_template("alert.html").render(
             brand=load_brand(), heading=heading, lines=lines, dashboard_url=s.base_url,
         )
-        await send(s.alert_recipients, subject, html, heading + "\n\n" + "\n".join(lines))
+        to = list(dict.fromkeys([*s.alert_recipients, *(extra_to or [])]))  # no one gets it twice
+        await send(to, subject, html, heading + "\n\n" + "\n".join(lines))
     except Exception:
         log.exception("Could not send alert email %s", key)
 
 
 async def alert_cookie_dead(slot: str, error: str, others: list[str] | None = None):
+    from .imagegen import is_bing
+    others_line = ("The other accounts now: " + (", ".join(others) if others else "none set")
+                   + " (ok = working; posts keep using the next working account: A, then B, then C).")
+    if is_bing(slot):
+        await send_alert(
+            f"cookie_{slot}", f"⚠️ Bing cookie (account {slot}) stopped working",
+            f"Bing account {slot} needs a fresh cookie",
+            [
+                f"Reason: {error}",
+                others_line,
+                "To fix: in FIREFOX open a private window → log in to the Microsoft account → open bing.com/images/create.",
+                "Press F12 → Storage → Cookies → https://www.bing.com → copy the value of _U.",
+                "Put it in BING_HARDCODED_U in app/config.py (it wins over .env and Render), "
+                "then push to GitHub: Render deploys the new version by itself in a few minutes.",
+                "Close the private window WITHOUT logging out.",
+            ],
+            extra_to=[COOKIE_ALERT_EMAIL],
+        )
+        return
     await send_alert(
         f"cookie_{slot}", f"⚠️ Gemini cookie {slot} stopped working",
         f"Gemini account {slot} needs a fresh cookie",
         [
             f"Reason: {error}",
-            "The other accounts now: " + (", ".join(others) if others else "none set")
-            + " (ok = working; posts keep using the next working account: A, then B, then C).",
+            others_line,
             "To fix: in FIREFOX open a private window → log in to that Google account → open gemini.google.com.",
             "Press F12 → Storage → Cookies → https://gemini.google.com → copy __Secure-1PSID and __Secure-1PSIDTS.",
             f"Put them in account \"{slot}\" of GEMINI_HARDCODED in app/config.py (these win over .env and Render), "
             "then push to GitHub: Render deploys the new version by itself in a few minutes.",
             "Close the private window WITHOUT logging out.",
         ],
+        extra_to=[COOKIE_ALERT_EMAIL],
     )
 
 
