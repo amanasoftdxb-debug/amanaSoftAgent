@@ -66,6 +66,7 @@ class BingClient:
     BASE = "https://www.bing.com"
     HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
                              "Chrome/131.0 Safari/537.36",
+               "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
                "Accept-Language": "en-US,en;q=0.9", "Referer": "https://www.bing.com/images/create"}
     IMG_RE = re.compile(r'src="(https://tse\d*\.mm\.bing\.net/th/id/OIG[^"]+)"')
 
@@ -80,24 +81,41 @@ class BingClient:
         if r.status_code != 200 or '"isSignedIn":true' not in r.text:
             raise AuthError(f"Bing cookie is logged out (HTTP {r.status_code})")
 
+    @staticmethod
+    def _bing_error(r: httpx.Response) -> str:
+        """What Bing said when it did not start a picture: its message, plus details for finding the cause."""
+        said = [html.unescape(m).strip() for m in re.findall(r'class="gil_err_(?:mt|sbt)"[^>]*>([^<]+)', r.text)]
+        where = (r.headers.get("location") or str(r.url)).split("?")[0].replace("https://www.bing.com", "")
+        return f"{' / '.join(said) or 'no message'} (HTTP {r.status_code} {where}" + (
+            ", not signed in" if '"isSignedIn":true' not in r.text and r.status_code == 200 else "") + ")"
+
+    async def _start(self, prompt: str) -> str:
+        """Ask Bing to start the picture; returns its request id."""
+        q = urllib.parse.quote(prompt)
+        errors = []
+        for attempt in range(2):
+            if attempt:
+                await asyncio.sleep(6)
+            # open the page first, like a browser, so Bing's own session cookies are fresh
+            await self.http.get(f"{self.BASE}/images/create", follow_redirects=True)
+            for rt in ("4", "3"):  # 4 = fast (uses a boost), 3 = free slower queue
+                r = await self.http.post(f"{self.BASE}/images/create?q={q}&rt={rt}&FORM=GENCRE",
+                                         data={"q": prompt, "qs": "ds"},
+                                         headers={"Origin": self.BASE, "Sec-Fetch-Site": "same-origin",
+                                                  "Sec-Fetch-Mode": "navigate", "Sec-Fetch-Dest": "document"})
+                m = re.search(r"[?&]id=([^&]+)", r.headers.get("location") or "")
+                if r.status_code in (301, 302) and m:
+                    return m.group(1)
+                if "login.live.com" in (r.headers.get("location") or "") or r.status_code in (401, 403):
+                    raise AuthError(f"Bing cookie is logged out (HTTP {r.status_code})")
+                errors.append(f"rt{rt}: {self._bing_error(r)}")
+                if any(w in errors[-1].lower() for w in ("blocked", "content policy", "unsafe")):
+                    raise BingBlocked("Bing blocked the prompt: " + errors[-1])
+        raise ImageGenError("Bing did not start the picture: " + " | ".join(errors))
+
     async def generate(self, prompt: str) -> bytes:
         q = urllib.parse.quote(prompt)
-        rid, errors = None, []
-        for rt in ("4", "3"):  # 4 = fast (uses a boost), 3 = free slower queue
-            r = await self.http.post(f"{self.BASE}/images/create?q={q}&rt={rt}&FORM=GENCRE",
-                                     data={"q": prompt, "qs": "ds"})
-            m = re.search(r"[?&]id=([^&]+)", r.headers.get("location") or "")
-            if r.status_code in (301, 302) and m:
-                rid = m.group(1)
-                break
-            if "login.live.com" in (r.headers.get("location") or "") or r.status_code in (401, 403):
-                raise AuthError(f"Bing cookie is logged out (HTTP {r.status_code})")
-            err = re.search(r'class="gil_err_(?:mt|sbt)"[^>]*>([^<]+)', r.text)
-            errors.append(html.unescape(err.group(1)).strip() if err else f"HTTP {r.status_code}")
-        if not rid:
-            if any(w in " ".join(errors).lower() for w in ("blocked", "content", "policy", "unsafe", "review")):
-                raise BingBlocked("Bing blocked the prompt: " + " | ".join(errors))
-            raise ImageGenError("Bing did not start the picture: " + " | ".join(errors))
+        rid = await self._start(prompt)
         loop = asyncio.get_running_loop()
         deadline = loop.time() + 300
         while loop.time() < deadline:
